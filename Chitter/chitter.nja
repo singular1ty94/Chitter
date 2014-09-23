@@ -1,0 +1,6 @@
+{
+  "venv": "", 
+  "name": "Chitter", 
+  "license": "MIT License", 
+  "description": "A CherryPy web server that interacts with the Twitter Streaming APIs."
+}
