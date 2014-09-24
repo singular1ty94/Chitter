@@ -12,22 +12,30 @@ asecret = 'oWOi5LppyKm5ApmCQoHpKMfzARcstinukMLmuuiaRl31E'
 
 #Tweets array
 tweets = []
+stop = False
 
 # Simple Class for Listening to
 # the stream.
 class listener(StreamListener):
-    def on_data(self, data):
-        tweets.append(data)
-        #print tweets.pop(0)
-        return True
 
-    def on_error(self, status):
-        print status
+	def on_data(self, data):
+		global stop
+		if stop is False:
+			tweets.append(data)
+			print data
+			return True
+		else:
+			return False
+
+	def on_error(self, status):
+		print status
 
 # Set up the core features, but don't stream yet.
 auth = OAuthHandler(ckey, csecret)
 auth.set_access_token(atoken, asecret)
 
+#Global twitter stream
+twitterStream = None;
 
 # The Chitter Web SErver
 class Chitter(object):
@@ -39,18 +47,27 @@ class Chitter(object):
    		return f.read()
    		
    	@cherrypy.expose
-   	def prepare(self):
+   	def prepare(self, search=""):
+   		global twitterStream, tweets, stop
+   		tweets = []
+   		stop = False
    		twitterStream = Stream(auth, listener())
-		twitterStream.filter(track=["car"])
+		twitterStream.filter(track=[search])
 		return "Streaming"
    		
    	@cherrypy.expose
    	def stream(self):
+   		global tweets
    		try:   	
    			return tweets.pop(0)
 		except:
 			pass
-		
+			
+	@cherrypy.expose
+	def stop(self):
+		global twitterStream, tweets, stop
+		stop = True		
+		tweets = []
    		
 
 if __name__ == '__main__':

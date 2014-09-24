@@ -42,6 +42,16 @@
       <div class="starter-template">
         <h1>Chitter - CherryPy Twitter</h1>
         <p class="lead">View the incoming tweets below.</p>
+
+		<form role="form">
+		  <div class="form-group">
+		    <label for="search">Search Term:</label>
+		    <input type="text" class="form-control" id="searchTerm" placeholder="Enter search term.">
+		  </div>
+		  <a id="searchBtn" class="btn btn-default">Search</a>
+		  <a id="stopBtn" class="btn btn-danger">Stop</a>
+		</form>
+
         <div id="twitter">
         </div>
       </div>
@@ -57,26 +67,37 @@
 
     <script type="text/javascript">
 	$(function() {
-	
-	  $.get('/prepare', function(data){
-	  		console.log(data);
-	  	});
+	  run = true;
 	
 	  function update() {
 	    $.get('/stream', function(data) {
 	      try{
 	      	tweet = JSON.parse(data);
-	      	$('#twitter').append("<br /><br />" + tweet.text);
+	      	$('#twitter').prepend("<br /><br />" + tweet.text);
 	      	//console.log(tweet);
 	      }catch(e){
 	      	
 	      }finally{
-	        setTimeout(update, 0);
+	      	if(run){
+	        	setTimeout(update, 0);
+	        }
 	      }
 	    });
 	  }
 	
-	  update();
+	  $('#searchBtn').click(function(){
+	    $.get('/prepare?search=' + $('#searchTerm').val(), function(data){
+
+	  	});	
+	  	run = true;
+	  	update();
+	  });
+
+	  $('#stopBtn').click(function(){
+	    $.get('/stop', function(data){
+			run = false;
+	  	});	
+	  });
 	});
 	</script>
   </body>
