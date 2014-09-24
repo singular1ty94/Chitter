@@ -37,7 +37,9 @@ auth.set_access_token(atoken, asecret)
 #Global twitter stream
 twitterStream = None;
 
-# The Chitter Web SErver
+##
+# The Chitter Web Server
+##
 class Chitter(object):
 	runOnce = False
 	
@@ -51,8 +53,13 @@ class Chitter(object):
    		global twitterStream, tweets, stop
    		tweets = []
    		stop = False
+   		
+   		# Just in case it's a comma-delimited list, split it.
+   		arr = search.split(',');
+   		arr[:] = [item.strip() for item in arr]		
+
    		twitterStream = Stream(auth, listener())
-		twitterStream.filter(track=[search])
+		twitterStream.filter(track=arr)
 		return "Streaming"
    		
    	@cherrypy.expose
@@ -70,6 +77,11 @@ class Chitter(object):
 		tweets = []
    		
 
+##
+# Standard setup for the simple web server.
+#
+# Sets the static folders under the /public route.
+##
 if __name__ == '__main__':
 	conf = {
 		'/': {

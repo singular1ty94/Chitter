@@ -48,8 +48,9 @@
 		    <label for="search">Search Term:</label>
 		    <input type="text" class="form-control" id="searchTerm" placeholder="Enter search term.">
 		  </div>
-		  <a id="searchBtn" class="btn btn-default">Search</a>
+		  <a id="searchBtn" class="btn btn-info">Search</a>
 		  <a id="stopBtn" class="btn btn-danger">Stop</a>
+		  <a id="clearBtn" class="btn btn-default">Clear</a>
 		</form>
 
         <div id="twitter">
@@ -69,15 +70,26 @@
 	$(function() {
 	  run = true;
 	
+	  /**
+	  * A long-polling function that requests the next
+	  * Tweet from the server. Should only be run after
+	  * a call to /prepare, and should ALWAYS have a 
+	  * way to stop polling.
+	  * This is because, even if you stop the actual data
+	  * transfer from the python server, the client will
+	  * keep polling for no reason, unless the timeout
+	  * is stopped.
+	  */
 	  function update() {
 	    $.get('/stream', function(data) {
 	      try{
 	      	tweet = JSON.parse(data);
+			//Stick it at the top of the <div>
 	      	$('#twitter').prepend("<br /><br />" + tweet.text);
-	      	//console.log(tweet);
 	      }catch(e){
-	      	
+	      	//Fail silently
 	      }finally{
+			//ALWAYS have a bail-out condition.
 	      	if(run){
 	        	setTimeout(update, 0);
 	        }
@@ -85,18 +97,36 @@
 	    });
 	  }
 	
-	  $('#searchBtn').click(function(){
+	  /**
+	  * Call the prepare endpoint, which sets the
+	  * Twitter search in motion.
+	  */
+	  $('#searchBtn').click(function(){	  
 	    $.get('/prepare?search=' + $('#searchTerm').val(), function(data){
-
+			//No data comes back.
 	  	});	
+		//Reset our variables, and start polling.
 	  	run = true;
 	  	update();
 	  });
-
+	  
+	  /**
+	  * Call the stop endpoint, which stops the Tweepy
+	  * trawl of the Twitter endpoint, and sets our private
+	  * runner to false, so the polling stops too.
+	  */
 	  $('#stopBtn').click(function(){
 	    $.get('/stop', function(data){
 			run = false;
 	  	});	
+	  });
+	  
+	  /**
+	  * Clear the screen and searches.
+	  */
+	  $('#clearBtn').click(function(){
+	    $('#searchTerm').val("");
+		$('#twitter').html("");
 	  });
 	});
 	</script>

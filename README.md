@@ -10,4 +10,4 @@ Sometimes you'll run into issues with Tweepy, you *must* use **Python 2.x**, and
 
 #Running
 
-Just run `python chitter.py`
+Just run `python chitter.py` and navigate to `http://127.0.0.1:8080`
