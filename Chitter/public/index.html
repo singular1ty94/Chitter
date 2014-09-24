@@ -26,7 +26,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="#">Project name</a>
+          <a class="navbar-brand" href="#">Chitter</a>
         </div>
         <div class="collapse navbar-collapse">
           <ul class="nav navbar-nav">
@@ -48,10 +48,23 @@
 		    <label for="search">Search Term:</label>
 		    <input type="text" class="form-control" id="searchTerm" placeholder="Enter search term.">
 		  </div>
-		  <a id="searchBtn" class="btn btn-info">Search</a>
+		  <a id="searchBtn" class="btn btn-success">Search</a>
 		  <a id="stopBtn" class="btn btn-danger">Stop</a>
 		  <a id="clearBtn" class="btn btn-default">Clear</a>
 		</form>
+		
+		<div class="shaft-load3">
+		  <div class="shaft1"></div>
+		  <div class="shaft2"></div>
+		  <div class="shaft3"></div>
+		  <div class="shaft4"></div>
+		  <div class="shaft5"></div>
+		  <div class="shaft6"></div>
+		  <div class="shaft7"></div>
+		  <div class="shaft8"></div>
+		  <div class="shaft9"></div>
+		  <div class="shaft10"></div>
+		</div>
 
         <div id="twitter">
         </div>
@@ -68,7 +81,9 @@
 
     <script type="text/javascript">
 	$(function() {
-	  run = true;
+	  run = false;
+	  
+	  $('.shaft-load3').hide();
 	
 	  /**
 	  * A long-polling function that requests the next
@@ -86,6 +101,7 @@
 	      	tweet = JSON.parse(data);
 			//Stick it at the top of the <div>
 	      	$('#twitter').prepend("<br /><br />" + tweet.text);
+			$('.shaft-load3').hide();
 	      }catch(e){
 	      	//Fail silently
 	      }finally{
@@ -101,13 +117,17 @@
 	  * Call the prepare endpoint, which sets the
 	  * Twitter search in motion.
 	  */
-	  $('#searchBtn').click(function(){	  
-	    $.get('/prepare?search=' + $('#searchTerm').val(), function(data){
-			//No data comes back.
-	  	});	
-		//Reset our variables, and start polling.
-	  	run = true;
-	  	update();
+	  $('#searchBtn').click(function(){	
+		if(!run){
+			$.get('/prepare?search=' + $('#searchTerm').val(), function(data){
+				//No data comes back.
+			});	
+			
+			//Reset our variables, and start polling.
+			$('.shaft-load3').show();
+			run = true;
+			update();			
+		}
 	  });
 	  
 	  /**
@@ -125,8 +145,11 @@
 	  * Clear the screen and searches.
 	  */
 	  $('#clearBtn').click(function(){
-	    $('#searchTerm').val("");
-		$('#twitter').html("");
+	    if(!run){
+			$('#searchTerm').val("");
+			$('#twitter').html("");
+			$('.shaft-load3').hide();
+		}
 	  });
 	});
 	</script>
