@@ -4,11 +4,14 @@ from tweepy import Stream
 from tweepy import OAuthHandler
 from tweepy.streaming import StreamListener
 
+from naives import *
+import json
+
 # OUR TWITTER KEYS
-ckey = 'TfbXbyPI2hF6IEpNtrzGBxXET'
-csecret = 'Qtb1vPdM7YSqcXKAdQkZ15MSuXYUzrH9Piv5ddBi6uF2gES3Fh'
-atoken = '615738366-ZPmyGEWqxVNkW2UFLSmH7HadACsM2kupw1Gf6QAR'
-asecret = 'oWOi5LppyKm5ApmCQoHpKMfzARcstinukMLmuuiaRl31E'
+ckey = 'MIoBpZbjBmRfH1ToD5oIuBOEk'
+csecret = 'qi37rRfdH3A8EHVCADKsfQJ045MjdYynV1xWAcWk394cIoXoXW'
+atoken = '182779783-LNZwsHtGLECvQfhcbD9UtlbjReyLkS7jNHFOiNjD'
+asecret = 'XSn95pTAyqhzyfoVhyGdEP6uu5ShbegQ8AGi4zkH5npkg'
 
 #Tweets array
 tweets = []
@@ -66,7 +69,11 @@ class Chitter(object):
    	def stream(self):
    		global tweets
    		try:   	
-   			return tweets.pop(0)
+   			temp = tweets.pop(0)
+   			test = json.loads(temp)
+   			modified = test['text'] + " - " + testTweet(classifier,test['text'])
+   			test['text'] =  modified
+   			return json.dumps(test)
 		except:
 			pass
 			
