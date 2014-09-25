@@ -43,7 +43,7 @@
         <h1>Chitter - CherryPy Twitter</h1>
         <p class="lead">View the incoming tweets below.</p>
 
-		<form role="form">
+		<form role="form" onsubmit="return false;">
 		  <div class="form-group">
 		    <label for="search">Search Term:</label>
 		    <input type="text" class="form-control" id="searchTerm" placeholder="Enter search term.">
@@ -112,13 +112,9 @@
 	      }
 	    });
 	  }
-	
-	  /**
-	  * Call the prepare endpoint, which sets the
-	  * Twitter search in motion.
-	  */
-	  $('#searchBtn').click(function(){	
-		if(!run){
+
+	  function prepare(){
+	  	if(!run && $('#searchTerm').val() != ""){
 			$.get('/prepare?search=' + $('#searchTerm').val(), function(data){
 				//No data comes back.
 			});	
@@ -128,6 +124,22 @@
 			run = true;
 			update();			
 		}
+	  }
+	
+	  /**
+	  * Call the prepare endpoint, which sets the
+	  * Twitter search in motion.
+	  */
+	  $('#searchBtn').click(function(){	
+		prepare();
+	  });
+
+
+	  // Added enter key runs stream
+	  $(document).keypress(function(e) {
+	    if(e.which == 13) {
+	        prepare();
+	    }
 	  });
 	  
 	  /**
@@ -138,6 +150,8 @@
 	  $('#stopBtn').click(function(){
 	    $.get('/stop', function(data){
 			run = false;
+			//Hide loading wheel
+			$('.shaft-load3').hide();
 	  	});	
 	  });
 	  

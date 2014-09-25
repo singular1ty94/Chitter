@@ -25,7 +25,6 @@ class listener(StreamListener):
 		global stop
 		if stop is False:
 			tweets.append(data)
-			print data
 			return True
 		else:
 			return False
