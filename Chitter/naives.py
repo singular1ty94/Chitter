@@ -189,7 +189,7 @@ else:
 
     # save_classifier(classifier,extractFeatures,tweets)
     f = open('naiveData.pickle', 'wb')
-    pickle.dump([featureList,classifier], f)
+    pickle.dump([featureList,classifier], f,0)
     f.close()
     testClassifier(classifier)
 
