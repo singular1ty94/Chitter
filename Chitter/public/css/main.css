@@ -6,6 +6,13 @@ body {
   text-align: center;
 }
 
+.positive{
+  color: green;
+}
+.negative{
+  color: red;
+}
+
 /* COURTESY OF Kyle Brumm OF http://codepen.io/kjbrum/pen/BraCg?editors=110 */
 /* Universal styling */
 [class^="shaft-load"] {

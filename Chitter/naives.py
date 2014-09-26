@@ -77,7 +77,7 @@ def getFeatureVector(tweet, stopWords):
 def testTweet(classifier,tweet):
     simplifyTestTweet = simplify(tweet)
     sentiment = classifier.classify(extractFeatures(getFeatureVector(simplifyTestTweet, stopWords)))
-    return ''+sentiment
+    return sentiment
 
 def testClassifier(classifier):
     print classifier.show_most_informative_features()
@@ -127,8 +127,8 @@ featureList = []
 tweets = []
 stopWords = getStopWordList('stopWords.txt')
 
-pos_train = 5000  
-neg_train = 5000
+pos_train = 10000  
+neg_train = 10000
 tweet = ''
 sentiment = ''
 
@@ -157,11 +157,11 @@ else:
 
         if sentiment == '1' and pos_train > 0:
 
-            pos_tweets.append((tweet,'positive'))
+            pos_tweets.append((tweet,1))
             pos_train -= 1
         else:
             if neg_train > 0:
-              neg_tweets.append((tweet,'negative'))
+              neg_tweets.append((tweet,0))
               neg_train -= 1
 
         if pos_train == 0 and neg_train == 0:

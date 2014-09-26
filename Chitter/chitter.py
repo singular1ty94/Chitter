@@ -67,12 +67,27 @@ class Chitter(object):
    	@cherrypy.expose
    	def stream(self):
    		global tweets
-   		try:   	
+   		try:
+
+            # temporary needs proper variables
+
    			temp = tweets.pop(0)
    			test = json.loads(temp)
-   			modified = test['text'] + " - " + testTweet(classifier,test['text'])
-   			test['text'] =  modified
-   			return json.dumps(test)
+                        simple = {"text":""}
+
+                        senti = testTweet(classifier,test['text'])
+
+                        print senti
+
+                        if(senti == 1):
+                                sentiWord = "<span class = 'positive'> Positive</span>"
+
+                        else:
+                                sentiWord = "<span class = 'negative'> Negative</span>"
+
+   			modified = test['text'] + " - " + sentiWord
+   			simple['text'] = modified
+   			return json.dumps(simple)
 		except:
 			pass
 			
