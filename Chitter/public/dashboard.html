@@ -55,36 +55,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <script src="/static/js/bootstrap.min.js"></script>
     <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
-    <script src="http://d3js.org/topojson.v0.min.js"></script>
-	<script>
-	/*
-	var width = 960,
-		height = 500;
 
-	var projection = d3.geo.mercator()
-		.center([0, 0])
-		.scale(150)
-		.rotate([-180,0]);
-
-	var svg = d3.select("#map").append("svg")
-		.attr("width", width)
-		.attr("height", height);
-
-	var path = d3.geo.path()
-		.projection(projection);
-
-	var g = svg.append("g");
-
-	// load and display the World
-	d3.json("json/world-110m2.json", function(error, topology) {
-		g.selectAll("path")
-		  .data(topojson.object(topology, topology.objects.countries)
-		      .geometries)
-		.enter()
-		  .append("path")
-		  .attr("d", path)
-	});*/
-	</script>
 	<script type="text/javascript">
 	var margin = {top: 20, right: 20, bottom: 30, left: 40},
 		width = 960 - margin.left - margin.right,
@@ -111,8 +82,8 @@
 	  .append("g")
 		.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-	d3.csv("lang.csv", type, function(error, data) {
-	  x.domain(data.map(function(d) { return d.Language; }));
+	d3.csv("metrics.csv", type, function(error, data) {
+	  x.domain(data.map(function(d) { return d.Type; }));
 	  y.domain([0, d3.max(data, function(d) { return d.Count; })]);
 
 	  svg.append("g")
@@ -134,7 +105,7 @@
 		  .data(data)
 		.enter().append("rect")
 		  .attr("class", "bar")
-		  .attr("x", function(d) { return x(d.Language); })
+		  .attr("x", function(d) { return x(d.Type); })
 		  .attr("width", x.rangeBand())
 		  .attr("y", function(d) { return y(d.Count); })
 		  .attr("height", function(d) { return height - y(d.Count); });

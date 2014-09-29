@@ -6,6 +6,7 @@ from tweepy.streaming import StreamListener
 from naives import *
 import json
 import subprocess
+from metrics import *
 
 # OUR TWITTER KEYS
 ckey = 'MIoBpZbjBmRfH1ToD5oIuBOEk'
@@ -38,6 +39,7 @@ auth.set_access_token(atoken, asecret)
 
 #Global twitter stream
 twitterStream = None;
+
 
 ##
 # The Chitter Web Server
@@ -79,15 +81,18 @@ class Chitter(object):
 			senti = testTweet(classifier,test['text'])
 			
 			## CALLS THE LANGUAGE FUNCTION ## 
-			subprocess.call(["python", "lang.py", "\"" + test['text'] + "\""])	#call the language function
+			#subprocess.call(["python", "lang.py", "\"" + test['text'] + "\""])	#call the language function
+			##
 			
+			simple['text'] = test['text']
 			
-			simple['text'] = test['text']			
 			if(senti == 1):
 					sentiWord = "<span class = 'positive'> Positive</span>"
+					metricAdjust("positive")
 
 			else:
 					sentiWord = "<span class = 'negative'> Negative</span>"
+					metricAdjust("negative")
 
 			modified = test['text'] + " - " + sentiWord
 			simple['text'] = modified
@@ -101,6 +106,7 @@ class Chitter(object):
 		global twitterStream, tweets, stop
 		stop = True		
 		tweets = []
+		saveMetrics()
 		
 	@cherrypy.expose
 	def dashboard(self):
@@ -108,7 +114,7 @@ class Chitter(object):
 		stop()
 		
 		#finalize the lang
-		save()
+		saveMetrics()
 		
 		f = open('public/dashboard.html', 'r')
    		html = f.read()
@@ -133,3 +139,6 @@ if __name__ == '__main__':
          }
     }
 	cherrypy.quickstart(Chitter(), '/', conf)
+	
+
+
