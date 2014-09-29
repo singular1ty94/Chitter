@@ -3,9 +3,9 @@ import cherrypy
 from tweepy import Stream
 from tweepy import OAuthHandler
 from tweepy.streaming import StreamListener
-
 from naives import *
 import json
+import subprocess
 
 # OUR TWITTER KEYS
 ckey = 'MIoBpZbjBmRfH1ToD5oIuBOEk'
@@ -17,6 +17,7 @@ asecret = 'XSn95pTAyqhzyfoVhyGdEP6uu5ShbegQ8AGi4zkH5npkg'
 tweets = []
 stop = False
 
+
 # Simple Class for Listening to
 # the stream.
 class listener(StreamListener):
@@ -25,7 +26,6 @@ class listener(StreamListener):
 		global stop
 		if stop is False:
 			tweets.append(data)
-			return True
 		else:
 			return False
 
@@ -48,7 +48,9 @@ class Chitter(object):
 	@cherrypy.expose
 	def index(self):
    		f = open('public/index.html', 'r')
-   		return f.read()
+   		html = f.read()
+   		f.close()
+   		return html
    		
    	@cherrypy.expose
    	def prepare(self, search=""):
@@ -68,26 +70,29 @@ class Chitter(object):
    	def stream(self):
    		global tweets
    		try:
+			# temporary needs proper variable
+			temp = tweets.pop(0)
+			test = json.loads(temp)
+			simple = {"text":""}
+			
+			## GET SENTIMENT ##
+			senti = testTweet(classifier,test['text'])
+			
+			## CALLS THE LANGUAGE FUNCTION ## 
+			subprocess.call(["python", "lang.py", "\"" + test['text'] + "\""])	#call the language function
+			
+			
+			simple['text'] = test['text']			
+			if(senti == 1):
+					sentiWord = "<span class = 'positive'> Positive</span>"
 
-            # temporary needs proper variables
+			else:
+					sentiWord = "<span class = 'negative'> Negative</span>"
 
-   			temp = tweets.pop(0)
-   			test = json.loads(temp)
-                        simple = {"text":""}
-
-                        senti = testTweet(classifier,test['text'])
-
-                        print senti
-
-                        if(senti == 1):
-                                sentiWord = "<span class = 'positive'> Positive</span>"
-
-                        else:
-                                sentiWord = "<span class = 'negative'> Negative</span>"
-
-   			modified = test['text'] + " - " + sentiWord
-   			simple['text'] = modified
-   			return json.dumps(simple)
+			modified = test['text'] + " - " + sentiWord
+			simple['text'] = modified
+			
+			return json.dumps(simple)
 		except:
 			pass
 			
@@ -96,6 +101,19 @@ class Chitter(object):
 		global twitterStream, tweets, stop
 		stop = True		
 		tweets = []
+		
+	@cherrypy.expose
+	def dashboard(self):
+		#stahp
+		stop()
+		
+		#finalize the lang
+		save()
+		
+		f = open('public/dashboard.html', 'r')
+   		html = f.read()
+   		f.close()
+   		return html
    		
 
 ##

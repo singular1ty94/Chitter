@@ -13,6 +13,38 @@ body {
   color: red;
 }
 
+
+
+.bar {
+  fill: steelblue;
+}
+
+.bar:hover {
+  fill: brown;
+}
+
+.axis {
+  font: 10px sans-serif;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.x.axis path {
+  display: none;
+}
+
+
+
+path {
+  stroke: white;
+  stroke-width: 0.25px;
+  fill: grey;
+}
 /* COURTESY OF Kyle Brumm OF http://codepen.io/kjbrum/pen/BraCg?editors=110 */
 /* Universal styling */
 [class^="shaft-load"] {
