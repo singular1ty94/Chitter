@@ -1,44 +1,18 @@
 import os, os.path
 import cherrypy
-from tweepy import Stream
-from tweepy import OAuthHandler
-from tweepy.streaming import StreamListener
 from naives import *
 import json
 import subprocess
 from metrics import *
+from twython import Twython
 
 # OUR TWITTER KEYS
 ckey = 'MIoBpZbjBmRfH1ToD5oIuBOEk'
 csecret = 'qi37rRfdH3A8EHVCADKsfQJ045MjdYynV1xWAcWk394cIoXoXW'
-atoken = '182779783-LNZwsHtGLECvQfhcbD9UtlbjReyLkS7jNHFOiNjD'
-asecret = 'XSn95pTAyqhzyfoVhyGdEP6uu5ShbegQ8AGi4zkH5npkg'
 
-#Tweets array
-tweets = []
-stop = False
-
-
-# Simple Class for Listening to
-# the stream.
-class listener(StreamListener):
-
-	def on_data(self, data):
-		global stop
-		if stop is False:
-			tweets.append(data)
-		else:
-			return False
-
-	def on_error(self, status):
-		print status
-
-# Set up the core features, but don't stream yet.
-auth = OAuthHandler(ckey, csecret)
-auth.set_access_token(atoken, asecret)
-
-#Global twitter stream
-twitterStream = None;
+#Used for the twython rest
+tweetsREST = []
+searchREST = ""
 
 
 ##
@@ -53,66 +27,9 @@ class Chitter(object):
    		html = f.read()
    		f.close()
    		return html
-   		
-   	@cherrypy.expose
-   	def prepare(self, search=""):
-   		global twitterStream, tweets, stop
-   		tweets = []
-   		stop = False
-   		
-   		# Just in case it's a comma-delimited list, split it.
-   		arr = search.split(',');
-   		arr[:] = [item.strip() for item in arr]		
-
-   		twitterStream = Stream(auth, listener())
-		twitterStream.filter(track=arr)
-		return "Streaming"
-   		
-   	@cherrypy.expose
-   	def stream(self):
-   		global tweets
-   		try:
-			# temporary needs proper variable
-			temp = tweets.pop(0)
-			test = json.loads(temp)
-			simple = {"text":""}
-			
-			## GET SENTIMENT ##
-			senti = testTweet(classifier,test['text'])
-			
-			## CALLS THE LANGUAGE FUNCTION ## 
-			#subprocess.call(["python", "lang.py", "\"" + test['text'] + "\""])	#call the language function
-			##
-			
-			simple['text'] = test['text']
-			
-			if(senti == 1):
-					sentiWord = "<span class = 'positive'> Positive</span>"
-					metricAdjust("positive")
-
-			else:
-					sentiWord = "<span class = 'negative'> Negative</span>"
-					metricAdjust("negative")
-
-			modified = test['text'] + " - " + sentiWord
-			simple['text'] = modified
-			
-			return json.dumps(simple)
-		except:
-			pass
-			
-	@cherrypy.expose
-	def stop(self):
-		global twitterStream, tweets, stop
-		stop = True		
-		tweets = []
-		saveMetrics()
-		
+   				
 	@cherrypy.expose
 	def dashboard(self):
-		#stahp
-		stop()
-		
 		#finalize the lang
 		saveMetrics()
 		
@@ -120,6 +37,57 @@ class Chitter(object):
    		html = f.read()
    		f.close()
    		return html
+   		
+   	@cherrypy.expose
+   	def rest(self, search=""):
+   		global tweetsREST, searchREST
+   		tweetsREST = []
+   		#READ ONLY ACCESS
+		#Rate Limited to 450/queries/15 mins
+		#ie 1800 per hour @ max 100 tweets each request.
+		twitter = Twython(ckey, csecret, oauth_version=2)
+		ACCESS = twitter.obtain_access_token()
+		twitter = Twython(ckey, access_token=ACCESS)
+
+		#Search as requested.
+		searchREST = search
+		tweet = twitter.search(q=search, count=100)
+		tweetsREST[:] = [t['text'] for t in tweet['statuses']]
+
+				
+	@cherrypy.expose
+   	def streamREST(self):
+   		global tweetsREST, searchREST
+   		
+   		#Exactly ten, Only do on 10
+   		if len(tweetsREST) == 10:
+   			twitter = Twython(ckey, csecret, oauth_version=2)
+			ACCESS = twitter.obtain_access_token()
+			twitter = Twython(ckey, access_token=ACCESS)
+			tweet = twitter.search(q=searchREST, count=100)
+			tweetsREST[:] = [t['text'] for t in tweet['statuses']]
+   		
+   		try:
+			# temporary needs proper variable
+			temp = tweetsREST.pop(0)
+			simple = {"text":""}
+			
+			## GET SENTIMENT ##
+			senti = testTweet(classifier, temp)
+			
+			if(senti == 1):
+				sentiWord = "<span class = 'positive'> Positive</span>"
+				metricAdjust("positive")
+
+			else:
+				sentiWord = "<span class = 'negative'> Negative</span>"
+				metricAdjust("negative")
+
+			modified = temp + " - " + sentiWord
+			simple['text'] = modified
+			return json.dumps(simple)
+		except:
+			pass
    		
 
 ##

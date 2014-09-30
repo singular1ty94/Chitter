@@ -41,7 +41,7 @@
 
       <div class="starter-template">
         <h1>Chitter - CherryPy Twitter</h1>
-        <p class="lead">View the incoming tweets below.</p>
+        <p class="lead">View the incoming (REST) tweets below.</p>
 
 		<form role="form" onsubmit="return false;">
 		  <div class="form-group">
@@ -96,7 +96,7 @@
 	  * is stopped.
 	  */
 	  function update() {
-	    $.get('/stream', function(data) {
+	    $.get('/streamREST', function(data) {
 	      try{
 	      	tweet = JSON.parse(data);
 			//Stick it at the top of the <div>
@@ -115,7 +115,7 @@
 
 	  function prepare(){
 	  	if(!run && $('#searchTerm').val() != ""){
-			$.get('/prepare?search=' + $('#searchTerm').val(), function(data){
+			$.get('/rest?search=' + $('#searchTerm').val(), function(data){
 				//No data comes back.
 			});	
 			
@@ -148,11 +148,11 @@
 	  * runner to false, so the polling stops too.
 	  */
 	  $('#stopBtn').click(function(){
-	    $.get('/stop', function(data){
+	    //$.get('/stop', function(data){
 			run = false;
 			//Hide loading wheel
 			$('.shaft-load3').hide();
-	  	});	
+	  	//});	
 	  });
 	  
 	  /**
