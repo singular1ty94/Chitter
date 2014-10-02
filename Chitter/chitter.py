@@ -59,14 +59,14 @@ class Chitter(object):
 		senti = testTweet(classifier, text)
 		
 		if(senti == 1):
-			sentiWord = "<span class = 'positive'> Positive</span>"
 			metricAdjust("positive")
+			return json.dumps(1)
 
 		else:
-			sentiWord = "<span class = 'negative'> Negative</span>"
 			metricAdjust("negative")
+			return json.dumps(0)
 
-		return json.dumps(sentiWord)
+		
 		# except:
 		# 	pass
    		

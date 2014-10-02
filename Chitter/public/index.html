@@ -84,6 +84,7 @@
 	  run = false;
 	  tweets = [];
 	  var myVar;
+	  searchTerm = "";
 	  
 	  $('.shaft-load3').hide();
 	
@@ -101,24 +102,45 @@
 
 	  function update(tweet) {
 	  	if (run){
-	  		console.log(tweets.length);
 	  		//Once tweets empty load more
 	  		if(tweets.length == 0 ){
 	  				clearInterval(myVar);
 					prepare();
 			}
 		  	$.get('/streamREST?text='+ tweet, function(data) {
-				$('#twitter').prepend("<br /><br />" + ".	" +  tweet+ JSON.parse(data));
+		  		if(JSON.parse(data) == 1)
+					sentiWord = "<span class = 'positive'> Positive</span>";
+				else
+					sentiWord = "<span class = 'negative'> Negative</span>";
+
+
+				$('#twitter').prepend("<br /><br />" +  tweet + sentiWord);
 			});
 		}
 	  }
 
 	  function prepare(){
 	  	if(run && $('#searchTerm').val() != ""){
+	  		searchTerm = $('#searchTerm').val();
+	  		
+	  		getTweets();
+			
+			//Reset our variables, and start polling.
+
+				
+		}
+	  }
+
+	  function getTweets(){
+
+	  		//if (tweets.length == 0)
 	  		$('.shaft-load3').show();
 
-			$.get('/rest?search=' + $('#searchTerm').val(), function(data){
-				tweets = JSON.parse(data);
+
+			$.get('/rest?search=' + searchTerm, function(data){
+				//adds to current stack of tweets
+				tweets.push.apply(tweets,JSON.parse(data));
+
 				console.log(tweets);
 				//Stick it at the top of the <div>
 				$('.shaft-load3').hide();
@@ -128,11 +150,7 @@
 
 					
 			});	
-			
-			//Reset our variables, and start polling.
 
-				
-		}
 	  }
 	
 	  /**
