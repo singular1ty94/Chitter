@@ -82,6 +82,8 @@
     <script type="text/javascript">
 	$(function() {
 	  run = false;
+	  tweets = [];
+	  var myVar;
 	  
 	  $('.shaft-load3').hide();
 	
@@ -95,34 +97,41 @@
 	  * keep polling for no reason, unless the timeout
 	  * is stopped.
 	  */
-	  function update() {
-	    $.get('/streamREST', function(data) {
-	      try{
-	      	tweet = JSON.parse(data);
-			//Stick it at the top of the <div>
-	      	$('#twitter').prepend("<br /><br />" + tweet.text);
-			$('.shaft-load3').hide();
-	      }catch(e){
-	      	//Fail silently
-	      }finally{
-			//ALWAYS have a bail-out condition.
-	      	if(run){
-	        	setTimeout(update, 0);
-	        }
-	      }
-	    });
+
+
+	  function update(tweet) {
+	  	if (run){
+	  		console.log(tweets.length);
+	  		//Once tweets empty load more
+	  		if(tweets.length == 0 ){
+	  				clearInterval(myVar);
+					prepare();
+			}
+		  	$.get('/streamREST?text='+ tweet, function(data) {
+				$('#twitter').prepend("<br /><br />" + ".	" +  tweet+ JSON.parse(data));
+			});
+		}
 	  }
 
 	  function prepare(){
-	  	if(!run && $('#searchTerm').val() != ""){
+	  	if(run && $('#searchTerm').val() != ""){
+	  		$('.shaft-load3').show();
+
 			$.get('/rest?search=' + $('#searchTerm').val(), function(data){
-				//No data comes back.
+				tweets = JSON.parse(data);
+				console.log(tweets);
+				//Stick it at the top of the <div>
+				$('.shaft-load3').hide();
+
+				//Call update at interval of 500 milliseconds
+				myVar = setInterval(function(){update(tweets.pop())}, 500);
+
+					
 			});	
 			
 			//Reset our variables, and start polling.
-			$('.shaft-load3').show();
-			run = true;
-			update();			
+
+				
 		}
 	  }
 	
@@ -130,7 +139,8 @@
 	  * Call the prepare endpoint, which sets the
 	  * Twitter search in motion.
 	  */
-	  $('#searchBtn').click(function(){	
+	  $('#searchBtn').click(function(){
+	  	run =true;	
 		prepare();
 	  });
 
@@ -138,6 +148,7 @@
 	  // Added enter key runs stream
 	  $(document).keypress(function(e) {
 	    if(e.which == 13) {
+	    	run =true;
 	        prepare();
 	    }
 	  });
@@ -149,6 +160,7 @@
 	  */
 	  $('#stopBtn').click(function(){
 	    //$.get('/stop', function(data){
+	    	clearInterval(myVar);
 			run = false;
 			//Hide loading wheel
 			$('.shaft-load3').hide();

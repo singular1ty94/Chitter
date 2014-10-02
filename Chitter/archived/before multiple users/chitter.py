@@ -10,6 +10,11 @@ from twython import Twython
 ckey = 'MIoBpZbjBmRfH1ToD5oIuBOEk'
 csecret = 'qi37rRfdH3A8EHVCADKsfQJ045MjdYynV1xWAcWk394cIoXoXW'
 
+#Used for the twython rest
+tweetsREST = []
+searchREST = ""
+
+
 ##
 # The Chitter Web Server
 ##
@@ -35,6 +40,7 @@ class Chitter(object):
    		
    	@cherrypy.expose
    	def rest(self, search=""):
+   		global tweetsREST, searchREST
    		tweetsREST = []
    		#READ ONLY ACCESS
 		#Rate Limited to 450/queries/15 mins
@@ -48,27 +54,40 @@ class Chitter(object):
 		tweet = twitter.search(q=search, count=100)
 		tweetsREST[:] = [t['text'] for t in tweet['statuses']]
 
-		#sends all tweets to client
-		return json.dumps(tweetsREST)
-
-	
-	# client will send tweet to get sentiment value
+				
 	@cherrypy.expose
-   	def streamREST(self,text=""):		
-		## GET SENTIMENT ##
-		senti = testTweet(classifier, text)
-		
-		if(senti == 1):
-			sentiWord = "<span class = 'positive'> Positive</span>"
-			metricAdjust("positive")
+   	def streamREST(self):
+   		global tweetsREST, searchREST
+   		
+   		#Exactly ten, Only do on 10
+   		if len(tweetsREST) == 10:
+   			twitter = Twython(ckey, csecret, oauth_version=2)
+			ACCESS = twitter.obtain_access_token()
+			twitter = Twython(ckey, access_token=ACCESS)
+			tweet = twitter.search(q=searchREST, count=100)
+			tweetsREST[:] = [t['text'] for t in tweet['statuses']]
+   		
+   		try:
+			# temporary needs proper variable
+			temp = tweetsREST.pop(0)
+			simple = {"text":""}
+			
+			## GET SENTIMENT ##
+			senti = testTweet(classifier, temp)
+			
+			if(senti == 1):
+				sentiWord = "<span class = 'positive'> Positive</span>"
+				metricAdjust("positive")
 
-		else:
-			sentiWord = "<span class = 'negative'> Negative</span>"
-			metricAdjust("negative")
+			else:
+				sentiWord = "<span class = 'negative'> Negative</span>"
+				metricAdjust("negative")
 
-		return json.dumps(sentiWord)
-		# except:
-		# 	pass
+			modified = temp + " - " + sentiWord
+			simple['text'] = modified
+			return json.dumps(simple)
+		except:
+			pass
    		
 
 ##
