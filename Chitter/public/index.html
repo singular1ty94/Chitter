@@ -125,7 +125,8 @@
 	 		// else
 	 		// 	$('.shaft-load3').hide();
 
-		  	$.get('/streamREST?text='+ tweet, function(data) {
+	 		//remove special characters from tweet
+		  	$.get('/streamREST?text='+ tweet.replace(/[^a-zA-Z ]/g, ""), function(data) {
 		  		if(JSON.parse(data) == 1){
 					sentiWord = "<span class = 'positive'> Positive</span>";
 					positive ++;
@@ -165,7 +166,6 @@
 				//adds to current stack of tweets
 				tweets.push.apply(tweets,JSON.parse(data));
 
-				console.log(tweets);
 				//Stick it at the top of the <div>
 				$('.shaft-load3').hide();
 				
