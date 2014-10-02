@@ -125,8 +125,14 @@
 	 		// else
 	 		// 	$('.shaft-load3').hide();
 
-	 		//remove special characters from tweet
-		  	$.get('/streamREST?text='+ tweet.replace(/[^a-zA-Z ]/g, ""), function(data) {
+	 		//remove special characters from tweet and urls
+	 		console.log(tweet);
+	 		tweet = tweet.replace(/http.[^\s]+/g, "");
+	 		tweet = tweet.replace(/www.[^\s]+/g, "");
+	 		tweet = tweet.replace(/.[^\s]+com/g, "");
+	 		tweet = tweet.replace(/[^a-zA-Z ]/g, "");
+	 		console.log(tweet);
+		  	$.get('/streamREST?text='+ tweet, function(data) {
 		  		if(JSON.parse(data) == 1){
 					sentiWord = "<span class = 'positive'> Positive</span>";
 					positive ++;
