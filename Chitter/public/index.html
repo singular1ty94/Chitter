@@ -257,7 +257,8 @@
 			$('.shaft-load3').hide();
 		}
 	  });
-	});
+
+
 
 
 	//----------------------------
@@ -306,11 +307,15 @@
 
 		 pie:{
         label:{
-           format:function(x){                                                            
-                return x;
-           }
-        }
-  },
+           	format:function(x){ 
+           		if (positive == 0 && negative == 0){
+           			return 0;
+           		}
+           		else 
+           			return x;
+		           }
+			}
+		},
 		   
 
 	    tooltip: {
@@ -330,6 +335,9 @@
 
 	    
 	});
+
+	});
+
 
 
 
