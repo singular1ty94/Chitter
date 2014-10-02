@@ -101,12 +101,19 @@
 
 
 	  function update(tweet) {
-	  	if (run){
+	  	if (run && tweets.length > 0){
+	  		console.log(tweets.length)
 	  		//Once tweets empty load more
-	  		if(tweets.length == 0 ){
-	  				clearInterval(myVar);
-					prepare();
-			}
+	  		if(tweets.length == 20){
+	 			setTimeout(getTweets(),0);
+	 		}
+
+	 		// if(tweets.length == 0){
+	 		// 	$('.shaft-load3').show();
+	 		// }
+	 		// else
+	 		// 	$('.shaft-load3').hide();
+
 		  	$.get('/streamREST?text='+ tweet, function(data) {
 		  		if(JSON.parse(data) == 1)
 					sentiWord = "<span class = 'positive'> Positive</span>";
@@ -133,24 +140,43 @@
 
 	  function getTweets(){
 
-	  		//if (tweets.length == 0)
-	  		$('.shaft-load3').show();
-
+	  		if (tweets.length < 20)
+	  			$('.shaft-load3').show();
 
 			$.get('/rest?search=' + searchTerm, function(data){
+				clearInterval(myVar);
 				//adds to current stack of tweets
 				tweets.push.apply(tweets,JSON.parse(data));
 
 				console.log(tweets);
 				//Stick it at the top of the <div>
 				$('.shaft-load3').hide();
-
+				
 				//Call update at interval of 500 milliseconds
-				myVar = setInterval(function(){update(tweets.pop())}, 500);
+				myVar = setInterval(function(){update(tweets.pop())}, 1000);
 
 					
 			});	
 
+	  }
+
+	  function start(){
+
+
+	  	clearInterval(myVar);
+
+	  	//resets tweets if new search temr is entered
+	  	if (searchTerm!=$('#searchTerm').val()){
+	  			tweets = [];
+	  	}
+
+
+	  	run =true;
+	  	if (tweets.length == 0){
+			prepare();
+		}
+		else
+			myVar = setInterval(function(){update(tweets.pop())}, 1000);
 	  }
 	
 	  /**
@@ -158,16 +184,14 @@
 	  * Twitter search in motion.
 	  */
 	  $('#searchBtn').click(function(){
-	  	run =true;	
-		prepare();
+	  		start();
 	  });
 
 
 	  // Added enter key runs stream
 	  $(document).keypress(function(e) {
 	    if(e.which == 13) {
-	    	run =true;
-	        prepare();
+	    	start();
 	    }
 	  });
 	  
