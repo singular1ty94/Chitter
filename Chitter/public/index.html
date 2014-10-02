@@ -50,9 +50,13 @@
 		  </div>
 		  <a id="searchBtn" class="btn btn-success">Search</a>
 		  <a id="stopBtn" class="btn btn-danger">Stop</a>
+		  <a id="GraphBtn" class="btn btn-info">Graph</a>
+
 		  <a id="clearBtn" class="btn btn-default">Clear</a>
 		</form>
 		
+		<div id='chart'></div>
+
 		<div class="shaft-load3">
 		  <div class="shaft1"></div>
 		  <div class="shaft2"></div>
@@ -78,6 +82,12 @@
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <script src="/static/js/bootstrap.min.js"></script>
+    <!-- Load c3.css -->
+	<link href="/static/css/c3.css" rel="stylesheet" type="text/css">
+
+	<!-- Load d3.js and c3.js -->
+	<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+	<script src="/static/css/c3.min.js"></script>
 
     <script type="text/javascript">
 	$(function() {
@@ -85,6 +95,8 @@
 	  tweets = [];
 	  var myVar;
 	  searchTerm = "";
+	  positive = 0;
+	  negative = 0;
 	  
 	  $('.shaft-load3').hide();
 	
@@ -98,7 +110,6 @@
 	  * keep polling for no reason, unless the timeout
 	  * is stopped.
 	  */
-
 
 	  function update(tweet) {
 	  	if (run && tweets.length > 0){
@@ -115,13 +126,19 @@
 	 		// 	$('.shaft-load3').hide();
 
 		  	$.get('/streamREST?text='+ tweet, function(data) {
-		  		if(JSON.parse(data) == 1)
+		  		if(JSON.parse(data) == 1){
 					sentiWord = "<span class = 'positive'> Positive</span>";
-				else
+					positive ++;
+				}
+
+				else{
 					sentiWord = "<span class = 'negative'> Negative</span>";
+					negative ++;
+				}
 
 
 				$('#twitter').prepend("<br /><br />" +  tweet + sentiWord);
+				updateChart();
 			});
 		}
 	  }
@@ -209,17 +226,111 @@
 	  	//});	
 	  });
 	  
+	  $('#GraphBtn').click(function(){
+
+		
+	
+		   $('#chart').slideToggle("fast");
+		 
+
+	  	//});	
+	  });
+	  
 	  /**
 	  * Clear the screen and searches.
 	  */
 	  $('#clearBtn').click(function(){
 	    if(!run){
+	  		resetChart();
+	  	
+	  		positive = 0;
+			negative = 0;
+
 			$('#searchTerm').val("");
 			$('#twitter').html("");
 			$('.shaft-load3').hide();
 		}
 	  });
 	});
+
+
+	//----------------------------
+	//d3
+
+	function resetChart(){
+		
+
+		chart.load({
+		  columns: [
+		    ["Negative", 1],
+		    ["Positive", 1],
+		  ]
+		});
+
+			}
+
+	function updateChart(){
+		chart.load({
+		  columns: [
+		   
+		    ["Negative", negative],
+		    ["Positive", positive],
+		  ]
+		});
+	}
+
+	var chart = c3.generate({
+	    data: {
+	        columns: [
+	            
+	            ['Negative', 1],
+	            ['Positive', 1]
+	        ],
+	        type : 'pie',
+		     colors: {
+	            Positive: '#5CB85C',
+	            Negative: '#d9534f',
+	        },
+
+	     
+
+
+
+		},
+
+		 pie:{
+        label:{
+           format:function(x){                                                            
+                return x;
+           }
+        }
+  },
+		   
+
+	    tooltip: {
+	        format: {
+	         value: d3.format('s') // apply this format to both y and y2
+	        }
+	    },
+
+        legend: {
+	        show: false
+	    },
+
+	    donut: {
+	        title: "Sentiment"
+	    }
+
+
+	    
+	});
+
+
+
+
+
+
+
 	</script>
   </body>
 </html>
