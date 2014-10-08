@@ -38,7 +38,24 @@ body {
   display: none;
 }
 
+#cool-stuff{
+	width:900px;
+	margin:0 auto;
+	display:block;
+	height:300px;
+}
 
+#chart{
+	display:inline-block;
+	float:left;
+	width:450px;
+}
+
+#cloud{
+	display:inline-block;
+	float:right;
+	width:450px;
+}
 
 path {
   stroke: white;

@@ -55,8 +55,6 @@
 		  <a id="clearBtn" class="btn btn-default">Clear</a>
 		</form>
 		
-		<div id='chart'></div>
-
 		<div class="shaft-load3">
 		  <div class="shaft1"></div>
 		  <div class="shaft2"></div>
@@ -69,7 +67,12 @@
 		  <div class="shaft9"></div>
 		  <div class="shaft10"></div>
 		</div>
-
+		
+		<div id='cool-stuff'>
+			<div id='chart'></div>
+			<div id='cloud'></div>
+		</div>
+		
         <div id="twitter">
         </div>
       </div>
@@ -86,265 +89,10 @@
 	<link href="/static/css/c3.css" rel="stylesheet" type="text/css">
 
 	<!-- Load d3.js and c3.js -->
-	<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+	<script src="/static/js/d3.v3.min.js" charset="utf-8"></script>
+	<script src="/static/js/d3.layout.cloud.js" charset="utf-8"></script>
 	<script src="/static/css/c3.min.js"></script>
 
-    <script type="text/javascript">
-	$(function() {
-	  run = false;
-	  tweets = [];
-	  var myVar;
-	  searchTerm = "";
-	  positive = 0;
-	  negative = 0;
-	  
-	  $('.shaft-load3').hide();
-	
-	  /**
-	  * A long-polling function that requests the next
-	  * Tweet from the server. Should only be run after
-	  * a call to /prepare, and should ALWAYS have a 
-	  * way to stop polling.
-	  * This is because, even if you stop the actual data
-	  * transfer from the python server, the client will
-	  * keep polling for no reason, unless the timeout
-	  * is stopped.
-	  */
-
-	  function update(tweet) {
-	  	if (run && tweets.length > 0){
-	  		console.log(tweets.length)
-	  		//Once tweets empty load more
-	  		if(tweets.length == 20){
-	 			setTimeout(getTweets(),0);
-	 		}
-
-	 		// if(tweets.length == 0){
-	 		// 	$('.shaft-load3').show();
-	 		// }
-	 		// else
-	 		// 	$('.shaft-load3').hide();
-
-	 		//remove special characters from tweet and urls
-	 		console.log(tweet);
-	 		tweet = tweet.replace(/http.[^\s]+/g, "");
-	 		tweet = tweet.replace(/www.[^\s]+/g, "");
-	 		tweet = tweet.replace(/.[^\s]+com/g, "");
-	 		tweet = tweet.replace(/[^a-zA-Z ]/g, "");
-	 		console.log(tweet);
-		  	$.get('/streamREST?text='+ tweet, function(data) {
-		  		if(JSON.parse(data) == 1){
-					sentiWord = "<span class = 'positive'> Positive</span>";
-					positive ++;
-				}
-
-				else{
-					sentiWord = "<span class = 'negative'> Negative</span>";
-					negative ++;
-				}
-
-
-				$('#twitter').prepend("<br /><br />" +  tweet + sentiWord);
-				updateChart();
-			});
-		}
-	  }
-
-	  function prepare(){
-	  	if(run && $('#searchTerm').val() != ""){
-	  		searchTerm = $('#searchTerm').val();
-	  		
-	  		getTweets();
-			
-			//Reset our variables, and start polling.
-
-				
-		}
-	  }
-
-	  function getTweets(){
-
-	  		if (tweets.length < 20)
-	  			$('.shaft-load3').show();
-
-			$.get('/rest?search=' + searchTerm, function(data){
-				clearInterval(myVar);
-				//adds to current stack of tweets
-				tweets.push.apply(tweets,JSON.parse(data));
-
-				//Stick it at the top of the <div>
-				$('.shaft-load3').hide();
-				
-				//Call update at interval of 500 milliseconds
-				myVar = setInterval(function(){update(tweets.pop())}, 1000);
-
-					
-			});	
-
-	  }
-
-	  function start(){
-
-
-	  	clearInterval(myVar);
-
-	  	//resets tweets if new search temr is entered
-	  	if (searchTerm!=$('#searchTerm').val()){
-	  			tweets = [];
-	  	}
-
-
-	  	run =true;
-	  	if (tweets.length == 0){
-			prepare();
-		}
-		else
-			myVar = setInterval(function(){update(tweets.pop())}, 1000);
-	  }
-	
-	  /**
-	  * Call the prepare endpoint, which sets the
-	  * Twitter search in motion.
-	  */
-	  $('#searchBtn').click(function(){
-	  		start();
-	  });
-
-
-	  // Added enter key runs stream
-	  $(document).keypress(function(e) {
-	    if(e.which == 13) {
-	    	start();
-	    }
-	  });
-	  
-	  /**
-	  * Call the stop endpoint, which stops the Tweepy
-	  * trawl of the Twitter endpoint, and sets our private
-	  * runner to false, so the polling stops too.
-	  */
-	  $('#stopBtn').click(function(){
-	    //$.get('/stop', function(data){
-	    	clearInterval(myVar);
-			run = false;
-			//Hide loading wheel
-			$('.shaft-load3').hide();
-	  	//});	
-	  });
-	  
-	  $('#GraphBtn').click(function(){
-
-		
-	
-		   $('#chart').slideToggle("fast");
-		 
-
-	  	//});	
-	  });
-	  
-	  /**
-	  * Clear the screen and searches.
-	  */
-	  $('#clearBtn').click(function(){
-	    if(!run){
-	  		resetChart();
-	  	
-	  		positive = 0;
-			negative = 0;
-
-			$('#searchTerm').val("");
-			$('#twitter').html("");
-			$('.shaft-load3').hide();
-		}
-	  });
-
-
-
-
-	//----------------------------
-	//d3
-
-	function resetChart(){
-		
-
-		chart.load({
-		  columns: [
-		    ["Negative", 1],
-		    ["Positive", 1],
-		  ]
-		});
-
-			}
-
-	function updateChart(){
-		chart.load({
-		  columns: [
-		   
-		    ["Negative", negative],
-		    ["Positive", positive],
-		  ]
-		});
-	}
-
-	var chart = c3.generate({
-	    data: {
-	        columns: [
-	            
-	            ['Negative', 1],
-	            ['Positive', 1]
-	        ],
-	        type : 'pie',
-		     colors: {
-	            Positive: '#5CB85C',
-	            Negative: '#d9534f',
-	        },
-
-	     
-
-
-
-		},
-
-		 pie:{
-        label:{
-           	format:function(x){ 
-           		if (positive == 0 && negative == 0){
-           			return 0;
-           		}
-           		else 
-           			return x;
-		           }
-			}
-		},
-		   
-
-	    tooltip: {
-	        format: {
-	         value: d3.format('s') // apply this format to both y and y2
-	        }
-	    },
-
-        legend: {
-	        show: false
-	    },
-
-	    donut: {
-	        title: "Sentiment"
-	    }
-
-
-	    
-	});
-
-	});
-
-
-
-
-
-
-
-
-	</script>
+    <script src="/static/core.js"></script>
   </body>
 </html>

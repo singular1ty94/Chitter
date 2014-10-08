@@ -26,7 +26,7 @@ class Chitter(object):
 	@cherrypy.expose
 	def dashboard(self):
 		#finalize the lang
-		saveMetrics()
+		#saveMetrics()
 		
 		f = open('public/dashboard.html', 'r')
    		html = f.read()
@@ -36,6 +36,7 @@ class Chitter(object):
    	@cherrypy.expose
    	def rest(self, search=""):
    		tweetsREST = []
+   		
    		#READ ONLY ACCESS
 		#Rate Limited to 450/queries/15 mins
 		#ie 1800 per hour @ max 100 tweets each request.
@@ -46,7 +47,12 @@ class Chitter(object):
 		#Search as requested.
 		searchREST = search
 		tweet = twitter.search(q=search, count=100)
-		tweetsREST[:] = [t['text'] for t in tweet['statuses']]
+		
+		for t in tweet['statuses']:
+			x = {}
+			x['text'] = t['text']	#get the text
+			x['hashtags'] = t['entities']['hashtags']
+			tweetsREST.append(x)
 
 		#sends all tweets to client
 		return json.dumps(tweetsREST)
@@ -59,11 +65,11 @@ class Chitter(object):
 		senti = testTweet(classifier, text)
 		
 		if(senti == 1):
-			metricAdjust("positive")
+			#metricAdjust("positive")
 			return json.dumps(1)
 
 		else:
-			metricAdjust("negative")
+			#metricAdjust("negative")
 			return json.dumps(0)
 
 		
