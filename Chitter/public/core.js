@@ -163,7 +163,8 @@ $(function() {
 	* Make the chart appear or disappear.
 	*/
 	$('#GraphBtn').click(function(){	
-  		$('#chart').slideToggle("fast");	 	
+  		$('#chart').slideToggle("fast");
+  		$('#cloud').slideTogle("fast");	 	
 	});
 
 	/**
@@ -301,6 +302,13 @@ $(function() {
 			.fontSize(function(d) { return d.size; })
 			.on("end", draw).start();
 			}
+			
+			//Register listeners for the newly added words.
+			$("#cloud text").click(function(){
+				//Adjust search.
+				$("#searchTerm").val($(this).html());
+				start();
+			});
 		}
 		
 	function resetCloud(){
