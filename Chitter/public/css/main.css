@@ -38,28 +38,41 @@ body {
   display: none;
 }
 
-#cool-stuff{
-	width:900px;
-	margin:0 auto;
-	display:block;
-	height:300px;
-}
 
 #chart{
-	display:inline-block;
+	display:block;
 	float:left;
-	width:450px;
+	width:100%;
 }
 
 #cloud{
-	display:inline-block;
-	float:right;
-	width:450px;
+	display:block;
+	float:left;
+	width:100%;
+}
+#twitter{
+  clear:both;
 }
 
 #cloud text:hover{
 	cursor:pointer;
 	opacity:0.5;
+}
+
+@media only screen and (min-width: 768px) { 
+  #chart{
+    display:block;
+    float:left;
+    width:50%;
+  }
+
+  #cloud{
+    display:block;
+    float:left;
+    width:50%;
+  }
+
+
 }
 
 

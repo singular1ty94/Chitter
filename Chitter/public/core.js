@@ -30,10 +30,11 @@ $(function() {
 			}
 
 			//remove special characters from tweet and urls
-			tweet.text = tweet.text.replace(/http.[^\s]+/g, "");
-			tweet.text = tweet.text.replace(/www.[^\s]+/g, "");
-			tweet.text = tweet.text.replace(/.[^\s]+com/g, "");
-			tweet.text = tweet.text.replace(/[^a-zA-Z ]/g, "");
+			temp = tweet.text
+			temp = temp.replace(/http.[^\s]+/g, "");
+			temp = temp.replace(/www.[^\s]+/g, "");
+			temp = temp.replace(/.[^\s]+com/g, "");
+			temp = temp.replace(/[^a-zA-Z ]/g, "");
 
 			if(tweet.hashtags.length > 0){		
 				updateTags(tweet.hashtags);
@@ -41,7 +42,7 @@ $(function() {
 
 	
 			//Retreive the Sentiment from the Server for just this tweet. 
-		  	$.get('/streamREST?text='+ tweet.text, function(data) {
+		  	$.get('/streamREST?text='+ temp, function(data) {
 		  		//Use the sentiment returned to us from the server.
   				if(JSON.parse(data) == 1){
 					sentiWord = "<span class = 'positive'> Positive</span>";
@@ -164,7 +165,7 @@ $(function() {
 	*/
 	$('#GraphBtn').click(function(){	
   		$('#chart').slideToggle("fast");
-  		$('#cloud').slideTogle("fast");	 	
+  		$('#cloud').slideToggle("fast");
 	});
 
 	/**
@@ -228,6 +229,7 @@ $(function() {
 		pie:{
 			label:{
 		   	    format:function(x){ 
+		   	    	//display 0,0 at beginning of load
 		   		   if (positive == 0 && negative == 0){
 		   			  return 0;
 				   } else {
@@ -239,6 +241,7 @@ $(function() {
 
 		tooltip: {
 			format: {
+				show: false,
 			 value: d3.format('s') // apply this format to both y and y2
 			}
 		},
