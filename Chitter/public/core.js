@@ -241,9 +241,9 @@ $(function() {
 
 		tooltip: {
 			format: {
-				show: false,
 			 value: d3.format('s') // apply this format to both y and y2
-			}
+			},
+			show: false
 		},
 
 		legend: {
