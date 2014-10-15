@@ -7,129 +7,80 @@
 $(function() {
 	run = false;
 	tweets = [];
-	var myVar;
-	var cloudVar;
+	var timer;
+	var cloud;
 	searchTerm = "";
 	positive = 0;
 	negative = 0;
-	var wordAssoc = {};
 	
 	$('.shaft-load3').hide();
+    
+    /**
+    * A long-polling function that fetches
+    * a tweet in JSON format from the server.
+    * This is a stripped JSON object, ie, it does
+    * not contain the full twitter JSON data.
+    */
+    function poll() {
+        timer = setTimeout(function() {
+            if(run){
 
-	/**
-	* Function that takes a given tweet,
-	* strips its characters, returns the
-	* sentiment from the server,
-	* and updates the page.
-	*/
-	function update(tweet) {
-		if (run && tweets.length > 0){	
-    		//Once tweets reach 20, load more
-		    if(tweets.length == 20){
-				setTimeout(getTweets(),0);
-			}
-
-			//remove special characters from tweet and urls
-			temp = tweet.text
-			temp = temp.replace(/http.[^\s]+/g, "");
-			temp = temp.replace(/www.[^\s]+/g, "");
-			temp = temp.replace(/.[^\s]+com/g, "");
-			temp = temp.replace(/[^a-zA-Z ]/g, "");
-
-			if(tweet.hashtags.length > 0){		
-				updateTags(tweet.hashtags);
-			}
-
-	
-			//Retreive the Sentiment from the Server for just this tweet. 
-		  	$.get('/streamREST?text='+ temp, function(data) {
-		  		//Use the sentiment returned to us from the server.
-  				if(JSON.parse(data) == 1){
-					sentiWord = "<span class = 'positive'> Positive</span>";
-					positive ++;
-				} else {
-					sentiWord = "<span class = 'negative'> Negative</span>";
-					negative ++;
-				}
-
-        		//Display it and update the chart.
-				$('#twitter').prepend("<br /><br />" +  tweet.text + sentiWord);
-				updateChart();
-			});
-		}
+            $.ajax({ url: "/stream", success: function(data) {
+                try{
+                	$('.shaft-load3').hide();
+                    $('#twitter').prepend("<br /><br />" + data.text + data.sentiWord);
+                    if(data.sentiment == 1){
+                        positive++;
+                    }else{
+                        negative++;
+                    }
+                    updateChart();
+                }catch(e){
+                }
+            }, dataType: "json", complete: poll });   
+            }
+        }, 100);
+    }
+    
+    /**
+    * Long-polling function that loads the word
+    * cloud from the server.
+    */
+    function tagCloud() {
+		cloud = setTimeout(function() {
+		    if(run){
+				$.ajax({ url: "/cloud", success: function(data) {
+					$("#cloud").html();
+					$("#cloud").html(data);
+					
+					//With the data, now we can do stuff.
+					$('.tag').click(function(){
+						$("#searchTerm").val($(this).data('hashtag'));
+						stop();
+						$("#cloud").html("");
+						start();
+					});
+					
+				}, fail: function(data){
+				
+				},complete: tagCloud });   
+		    }
+		}, 1000);
 	}
 
-	/**
-	* Updates the cloud of hashtags.
-	*/
-	function updateTags(hashtags){
-		for(var i = 0; i < hashtags.length; i++){
-			if(!wordAssoc[hashtags[i].text]){
-				wordAssoc[hashtags[i].text] = 1;
-			}else{
-				wordAssoc[hashtags[i].text] += 1;
-			}
-		}
-	}
-	/**
-	* Function that extracts the search term and
-	* sets the getTweet loop into motion.
-	*/ 
-	function prepare(){
-		if(run && $('#searchTerm').val() != ""){
-			searchTerm = $('#searchTerm').val();	  		
-			getTweets();				
-		}
-	}
-
-	/**
-	* Calls the server to give us 100
-	* tweets, which contain the text of 
-	* the tweet only.
-	*/ 
-	function getTweets(){
-		//Show the symbol if we're still loading or about to load.
-    	if (tweets.length < 20){
-			$('.shaft-load3').show();
-    	}
-
-		$.get('/rest?search=' + searchTerm, function(data){
-			clearInterval(myVar);
-			clearInterval(cloudVar);
-			        
-			//adds to current stack of tweets
-			tweets.push.apply(tweets,JSON.parse(data));
-
-			//Hide the shaft
-			$('.shaft-load3').hide();
-		
-			//Call update at interval of 1000 milliseconds
-			myVar = setInterval(function(){update(tweets.pop())}, 1000);
-			cloudVar = setInterval(function(){updateCloud()}, 2300);
-			
-		});	
-	}
-	
+    
 	/**
 	* Clears the private variables.
 	* Starts a new session.
 	*/ 
 	function start(){
-		clearInterval(myVar);
-		clearInterval(cloudVar);
-
-		//resets tweets if new search term is entered
-		if (searchTerm!=$('#searchTerm').val()){
-			tweets = [];
-		}
-
-		run = true;
-		if (tweets.length == 0){
-			prepare();
-		} else {
-			myVar = setInterval(function(){update(tweets.pop())}, 1000);
-			cloudVar = setInterval(function(){updateCloud()}, 2000);
-		}	
+		$('.shaft-load3').show();
+        $.get('/prepare?search=' + $("#searchTerm").val(), function(data) {
+            //Now we set it to go.
+        });
+        run = true;
+        poll();
+        tagCloud();
 	}
 
 	/**
@@ -151,14 +102,22 @@ $(function() {
 	* Stops the search from running.
 	*/
 	$('#stopBtn').click(function(){
-		clearInterval(myVar);
-		clearInterval(cloudVar);
-		run = false;
-
+		stop();
+	});
+	
+	/**
+	* Stops the search from running.
+	*/
+	function stop(){
+	    //Stop!
+        $.get('/stop', function(data){
+        
+        });
+        clearTimeout(timer);
+        run = false;
 		//Hide loading wheel
 		$('.shaft-load3').hide();
-
-	});
+	}
 
 	/**
 	* Make the chart appear or disappear.
@@ -174,7 +133,6 @@ $(function() {
 	$('#clearBtn').click(function(){
 		if(!run){
 			resetChart();
-			resetCloud();
 
 			positive = 0;
 			negative = 0;
@@ -182,6 +140,12 @@ $(function() {
 			$('#searchTerm').val("");
 			$('#twitter').html("");
 			$('.shaft-load3').hide();
+			
+			$("#cloud").html("");
+			
+			$.get("/clear", function(data){
+			
+			});
 		}
 	});
 
@@ -255,71 +219,4 @@ $(function() {
 		}
 
 	});
-
-////////////////
-// WORD CLOUD //
-////////////////
-	var fill = d3.scale.category20b();
-	var rendering = false;
-
-
-	function draw(words) {
-		d3.select("#cloud").append("svg")
-		.attr("width", 300)
-		.attr("height", 300)
-		.append("g")
-		.attr("transform", "translate(150,150)")
-		.selectAll("text")
-		.data(words)
-		.enter().append("text")
-		.style("font-size", function(d) { return d.size + "px"; })
-		.style("font-family", "Impact")
-		.style("fill", function(d, i) { return fill(i); })
-		.attr("text-anchor", "middle")
-		.attr("transform", function(d) {
-			return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
-		}).text(function(d) { 
-			return d.text; 
-		});
-		rendering = false;
-	}
-
-	
-	function updateCloud(){
-	
-		if(!rendering){
-			rendering = true;
-			var myNode = document.getElementById("cloud");
-			while (myNode.firstChild) {
-				myNode.removeChild(myNode.firstChild);
-			}
-			
-			d3.layout.cloud().size([300, 300])
-			.words(Object.keys(wordAssoc)
-			.map(function(d) {
-				return {text: d, size: wordAssoc[d]*20};
-			}))
-			.padding(5)
-			.rotate(function() { return ~~(Math.random() * 2) * 90; })
-			.font("Impact")
-			.fontSize(function(d) { return d.size; })
-			.on("end", draw).start();
-			}
-			
-			//Register listeners for the newly added words.
-			$("#cloud text").click(function(){
-				//Adjust search.
-				$("#searchTerm").val($(this).html());
-				start();
-			});
-		}
-		
-	function resetCloud(){
-		var myNode = document.getElementById("cloud");
-		while (myNode.firstChild) {
-			myNode.removeChild(myNode.firstChild);
-		}
-		rendering = false;
-		wordAssoc = {};
-	}
 });
