@@ -12,6 +12,7 @@ from pytagcloud.lang.counter import get_tag_counts
 from string import Template
 
 
+
 # OUR TWITTER KEYS
 ckey = 'MIoBpZbjBmRfH1ToD5oIuBOEk'
 csecret = 'qi37rRfdH3A8EHVCADKsfQJ045MjdYynV1xWAcWk394cIoXoXW'
@@ -24,6 +25,7 @@ stop = False
 
 #Hahstags
 HASHTAGS = ""
+html_text = ""
 
 
 ##
@@ -165,32 +167,37 @@ class Chitter(object):
 	##	
     @cherrypy.expose
     def cloud(self):
-		global HASHTAGS
-		if len(HASHTAGS) > 0:
-			tags = make_tags(get_tag_counts(HASHTAGS), maxsize=40, colors=COLOR_SCHEMES['goldfish'])
-			data = create_html_data(tags, (400,400), layout=LAYOUT_HORIZONTAL, fontname='Cantarell')
-		
-			template_file = open(os.path.join('public', 'template.html'), 'r')
-			html_template = Template(template_file.read())
-		
-			context = {}
-			tags_template = '<li class="cnt" style="top: %(top)dpx; left: %(left)dpx; height: %(height)dpx;"><a class="tag %(cls)s" href="#" data-hashtag="%(tag)s" style="top: %(top)dpx;left: %(left)dpx; font-size: %(size)dpx; height: %(height)dpx; line-height:%(lh)dpx;">%(tag)s</a></li>'
-		
-			context['tags'] = ''.join([tags_template % link for link in data['links']])
-			context['width'] = 400
-			context['height'] = 400
-			context['css'] = "".join("a.%(cname)s{color:%(normal)s;}\
-			a.%(cname)s:hover{color:%(hover)s;}" %
-									{'cname':k,
-									'normal': v[0],
-									'hover': v[1]}
-								for k,v in data['css'].items())
-		
-			html_text = html_template.substitute(context)
-			return html_text
-		else:
-			return ""
-	
+	global HASHTAGS,html_text
+
+        if len(HASHTAGS)>0:
+                if len(get_tag_counts(HASHTAGS)) <= 50 :
+                	tags = make_tags(get_tag_counts(HASHTAGS), minsize=30,  maxsize=80, colors=COLOR_SCHEMES['goldfish'])
+                	data = create_html_data(tags, (400,400), layout=LAYOUT_HORIZONTAL, fontname='Cantarell')
+
+
+
+                	template_file = open(os.path.join('public', 'template.html'), 'r')
+                	html_template = Template(template_file.read())
+
+                	context = {}
+                	tags_template = '<li class="cnt" style="top: %(top)dpx; left: %(left)dpx; height: %(height)dpx;"><a class="tag %(cls)s" href="#" data-hashtag="%(tag)s" style="top: %(top)dpx;left: %(left)dpx; font-size: %(size)dpx; height: %(height)dpx; line-height:%(lh)dpx;">%(tag)s</a></li>'
+
+                	context['tags'] = ''.join([tags_template % link for link in data['links']])
+                	context['width'] = 400
+                	context['height'] = 400
+                	context['css'] = "".join("a.%(cname)s{color:%(normal)s;}\
+                	a.%(cname)s:hover{color:%(hover)s;}" %
+                							{'cname':k,
+                							'normal': v[0],
+                							'hover': v[1]}
+                						for k,v in data['css'].items())
+
+                	html_text = html_template.substitute(context)
+                        return html_text
+                
+        	if len(get_tag_counts(HASHTAGS)) > 50 :
+                        HASHTAGS = ""
+                        return html_text
 ##
 # Standard setup for the simple web server.
 #
@@ -198,14 +205,16 @@ class Chitter(object):
 # Uncomment the line below to enable hosting on AWS or cloud.
 ##
 if __name__ == '__main__':
+
     conf = {
             '/': {
-                    'tools.sessions.on': True,
-        'tools.staticdir.root': os.path.abspath(os.getcwd())
-     },
-     '/static': {
-         'tools.staticdir.on': True,
-         'tools.staticdir.dir': './public'
+                'tools.sessions.on': True,
+                'tools.staticdir.root': os.path.abspath(os.getcwd()),
+                'server.thread_pool':30
+             },
+             '/static': {
+                 'tools.staticdir.on': True,
+                 'tools.staticdir.dir': './public'
      }
     }
     #cherrypy.config.update({'server.socket_host': '0.0.0.0','server.socket_port': 3000})

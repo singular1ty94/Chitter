@@ -9,7 +9,7 @@ $(function() {
 	tweets = [];
 	var timer;
 	var cloud;
-	searchTerm = "";
+
 	positive = 0;
 	negative = 0;
 	
@@ -39,7 +39,7 @@ $(function() {
                 }
             }, dataType: "json", complete: poll });   
             }
-        }, 100);
+        }, 1000);
     }
     
     /**
@@ -74,13 +74,15 @@ $(function() {
 	* Starts a new session.
 	*/ 
 	function start(){
-		$('.shaft-load3').show();
-        $.get('/prepare?search=' + $("#searchTerm").val(), function(data) {
-            //Now we set it to go.
-        });
-        run = true;
-        poll();
-        tagCloud();
+		if($("#searchTerm").val()!=""){
+			$('.shaft-load3').show();
+	        $.get('/prepare?search=' + $("#searchTerm").val(), function(data) {
+	            //Now we set it to go.
+	        });
+	        run = true;
+	        poll();
+	        tagCloud();
+	    }
 	}
 
 	/**
@@ -114,6 +116,7 @@ $(function() {
         
         });
         clearTimeout(timer);
+        clearTimeout(cloud);
         run = false;
 		//Hide loading wheel
 		$('.shaft-load3').hide();
@@ -132,10 +135,11 @@ $(function() {
 	*/
 	$('#clearBtn').click(function(){
 		if(!run){
-			resetChart();
-
+			
 			positive = 0;
 			negative = 0;
+			resetChart();
+			
 
 			$('#searchTerm').val("");
 			$('#twitter').html("");
@@ -155,29 +159,10 @@ $(function() {
 	/**
 	* Resets the chart to nothing.
 	*/ 
+	var chart;
+
 	function resetChart(){	
-
-		chart.load({
-	  		columns: [
-				["Negative", 1],
-				["Positive", 1],
-	  		]
-		});
-	}
-
-	/**
-	* Updates chart with global variables.
-	*/ 
-	function updateChart(){
-		chart.load({
-		  columns: [		   
-		    ["Negative", negative],
-		    ["Positive", positive],
-  		]
-		});
-	}
-
-	var chart = c3.generate({
+	chart = c3.generate({
 		data: {
 			columns: [	            
 				['Negative', 1],
@@ -207,7 +192,7 @@ $(function() {
 			format: {
 			 value: d3.format('s') // apply this format to both y and y2
 			},
-			show: false
+			show: true
 		},
 
 		legend: {
@@ -219,4 +204,24 @@ $(function() {
 		}
 
 	});
+
+	}
+
+	/**
+	* Updates chart with global variables.
+	*/ 
+	function updateChart(){
+		chart.load({
+		  columns: [		   
+		    ["Negative", negative],
+		    ["Positive", positive],
+  		]
+		});
+	}
+
+	resetChart();
+
+
+
+
 });
