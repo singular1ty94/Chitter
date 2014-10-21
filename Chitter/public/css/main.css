@@ -13,8 +13,6 @@ body {
   color: red;
 }
 
-
-
 .bar {
   fill: steelblue;
 }
@@ -52,6 +50,12 @@ body {
 }
 #twitter{
   clear:both;
+  width:900px;
+  margin:0 auto;
+}
+
+#twitter img{
+	margin-right:20px;
 }
 
 #cloud text:hover{
@@ -74,8 +78,6 @@ body {
 
 
 }
-
-
 
 path {
   stroke: white;
@@ -264,4 +266,87 @@ path {
   75% {
     border-color: rgba(86, 215, 198, 0.1) transparent transparent #56D7C6;
   }
+}
+
+/**** COURTESY OF NICHOLAS GALLAGHER 
+http://nicolasgallagher.com/pure-css-speech-bubbles/demo/default.css
+**/
+/* ============================================================================================================================
+== BUBBLE WITH A BORDER AND TRIANGLE
+** ============================================================================================================================ */
+
+/* THE SPEECH BUBBLE
+------------------------------------------------------------------------------------------------------------------------------- */
+
+.triangle-border {
+  position:relative;
+  max-width:800px;
+  padding:15px;
+  margin:1em 0 3em;
+  border:5px solid #5a8f00;
+  color:#333;
+  background:#fff;
+  /* css3 */
+  -webkit-border-radius:10px;
+  -moz-border-radius:10px;
+  border-radius:10px;
+}
+
+/* Variant : for left positioned triangle
+------------------------------------------ */
+
+.triangle-border.positive {
+  margin-left:30px;
+  border:5px solid #5CB85C !important;
+}
+
+/* Variant : for right positioned triangle
+------------------------------------------ */
+
+.triangle-border.negative {
+  margin-right:30px;
+  border:5px solid #d9534f !important;
+}
+
+/* THE TRIANGLE
+------------------------------------------------------------------------------------------------------------------------------- */
+
+.triangle-border.negative:before {
+  content:"";
+  position:absolute;
+  bottom:-20px; /* value = - border-top-width - border-bottom-width */
+  left:40px; /* controls horizontal position */
+  border-width:20px 20px 0;
+  border-style:solid;
+  border-color:#d9534f transparent;
+  /* reduce the damage in FF3.0 */
+  display:block;
+  width:0;
+}
+
+.triangle-border.positive:before {
+  content:"";
+  position:absolute;
+  bottom:-20px; /* value = - border-top-width - border-bottom-width */
+  left:40px; /* controls horizontal position */
+  border-width:20px 20px 0;
+  border-style:solid;
+  border-color:#5CB85C transparent;
+  /* reduce the damage in FF3.0 */
+  display:block;
+  width:0;
+}
+
+/* creates the smaller  triangle */
+.triangle-border:after {
+  content:"";
+  position:absolute;
+  bottom:-13px; /* value = - border-top-width - border-bottom-width */
+  left:47px; /* value = (:before left) + (:before border-left) - (:after border-left) */
+  border-width:13px 13px 0;
+  border-style:solid;
+  border-color:#fff transparent;
+  /* reduce the damage in FF3.0 */
+  display:block;
+  width:0;
 }

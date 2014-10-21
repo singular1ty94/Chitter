@@ -28,18 +28,20 @@ $(function() {
             $.ajax({ url: "/stream", success: function(data) {
                 try{
                 	$('.shaft-load3').hide();
-                    $('#twitter').prepend("<br /><br />" + data.text + data.sentiWord);
-                    if(data.sentiment == 1){
+					if(data.sentiment == 1){
                         positive++;
+						sent = "positive";
                     }else{
                         negative++;
+						sent = "negative";
                     }
+                    $('#twitter').prepend("<p class=\"triangle-border " + sent + "\"><img src=\"" + data.profile + "\" alt=\"\" />" + data.text + data.sentiWord + "</p>");
                     updateChart();
                 }catch(e){
                 }
             }, dataType: "json", complete: poll });   
             }
-        }, 1000);
+        }, 50);
     }
     
     /**
