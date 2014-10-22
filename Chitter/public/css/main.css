@@ -46,7 +46,8 @@ body {
 #cloud{
 	display:block;
 	float:left;
-	width:100%;
+	width:400px;
+	height:400px;
 }
 #twitter{
   clear:both;

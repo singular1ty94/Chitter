@@ -28,6 +28,7 @@ $(function() {
             $.ajax({ url: "/stream", success: function(data) {
                 try{
                 	$('.shaft-load3').hide();
+					//Check the sentiment
 					if(data.sentiment == 1){
                         positive++;
 						sent = "positive";
@@ -35,7 +36,38 @@ $(function() {
                         negative++;
 						sent = "negative";
                     }
-                    $('#twitter').prepend("<p class=\"triangle-border " + sent + "\"><img src=\"" + data.profile + "\" alt=\"\" />" + data.text + data.sentiWord + "</p>");
+					//Get the hashtags and make the clickable.
+					var arr = data.text.match(/[#][a-zA-Z]+/g);
+					var text = data.text;
+					for (var item in arr){
+						text = text.replace(arr[item], "<a href=\"#\" data-hashtag=\"" + arr[item].substring(1, arr[item].length) + "\">" + arr[item] + "</a>");
+					}
+					
+					//Get the hyperlinks
+					arr = text.match(/(http:\/\/)[a-zA-Z.0-9\/]+/g);
+					for (var item in arr){
+						text = text.replace(arr[item], "<a href=\"" + arr[item] + "\" target=\"_blank\">" + arr[item] + "</a>");
+					}
+					
+					//Now the twitter handles.
+					arr = text.match(/(@)[a-zA-Z0-9_]+/g);
+					for (var item in arr){
+						text = text.replace(arr[item], "<a href=\"" + arr[item] + "\" target=\"_blank\">" + arr[item] + "</a>");
+					}
+					
+					//Inject it.
+                    $('#twitter').prepend("<p class=\"triangle-border " + sent + "\">"+
+					"<img src=\"" + data.profile + "\" alt=\"\" />" + text + data.sentiWord + "</p>");
+					
+					//Register listener
+					$('#twitter a').click(function(){
+						$("#searchTerm").val($(this).data('hashtag'));
+						stop();
+						$("#cloud").html("");
+						start();
+					});
+					
+					//Update chart
                     updateChart();
                 }catch(e){
                 }
@@ -56,7 +88,7 @@ $(function() {
 					$("#cloud").html(data);
 					
 					//With the data, now we can do stuff.
-					$('.tag').click(function(){
+					$('#cloud a').click(function(){
 						$("#searchTerm").val($(this).data('hashtag'));
 						stop();
 						$("#cloud").html("");

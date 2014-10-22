@@ -6,11 +6,8 @@ import subprocess
 from tweepy import Stream
 from tweepy import OAuthHandler
 from tweepy.streaming import StreamListener
-from pytagcloud import create_tag_image, create_html_data, make_tags, LAYOUT_HORIZONTAL, LAYOUTS
-from pytagcloud.colors import COLOR_SCHEMES
-from pytagcloud.lang.counter import get_tag_counts
 from string import Template
-
+from random import randint
 
 
 # OUR TWITTER KEYS
@@ -24,8 +21,11 @@ tweets = []
 stop = False
 
 #Hahstags
-HASHTAGS = ""
+HASHTAGS = []
 html_text = ""
+
+#Colorscheme
+COLOR_SCHEME = [(229,106,0), (204,199,148), (153,145,124), (88,89,86), (48,49,51)]
 
 
 ##
@@ -49,7 +49,7 @@ class listener(StreamListener):
             try:           
                 hashtags = tweet['entities']['hashtags']
                 for item in hashtags:
-                    HASHTAGS += ' ' + item['text']
+                    HASHTAGS.append(item['text'].upper())
             except:
                 e = sys.exc_info()[0]
                 print e                 
@@ -69,6 +69,20 @@ auth.set_access_token(atoken, asecret)
 
 #Global twitter stream
 twitterStream = None
+
+##
+# Simple cloud tag generator based on the weight
+# of any given word in a dictionary of terms.
+##
+def gen_cloud(tags):
+    global COLOR_SCHEME
+    words = {}
+    for x in (' '.join(tags)).split():
+        words[x] = 1 + words.get(x, 0)
+
+    return ' '.join([('<a data-hashtag="%s" href="#" style="font-size:%dpt !important; color:rgb%s">%s(%d)</a>'
+                      %(x, min(10 + (p*10) / max(words.values()), 20), COLOR_SCHEME[randint(0,len(COLOR_SCHEME)-1)],x, p))
+                     for (x, p) in words.items()])
 
 ##
 # The Chitter Web Server
@@ -96,7 +110,7 @@ class Chitter(object):
         global twitterStream, tweets, stop, HASHTAGS
         tweets = []
         stop = False
-        HASHTAGS = ""
+        HASHTAGS = []
         
         # Just in case it's a comma-delimited list, split it.
         arr = search.split(',');
@@ -160,7 +174,7 @@ class Chitter(object):
         stop = True 
         twitterStream.disconnect()
         tweets = []
-        HASHTAGS = ""
+        HASHTAGS = []
 
     ##
     # ENDPOINT: /cloud
@@ -169,35 +183,9 @@ class Chitter(object):
     ##  
     @cherrypy.expose
     def cloud(self):
-        global HASHTAGS,html_text
-
-        if len(HASHTAGS)>0:
-            if len(get_tag_counts(HASHTAGS)) <= 50 :
-                tags = make_tags(get_tag_counts(HASHTAGS), minsize=30,  maxsize=80, colors=COLOR_SCHEMES['goldfish'])
-                data = create_html_data(tags, (400,400), layout=LAYOUT_HORIZONTAL, fontname='Cantarell')
-
-                template_file = open(os.path.join('public', 'template.html'), 'r')
-                html_template = Template(template_file.read())
-
-                context = {}
-                tags_template = '<li class="cnt" style="top: %(top)dpx; left: %(left)dpx; height: %(height)dpx;"><a class="tag %(cls)s" href="#" data-hashtag="%(tag)s" style="top: %(top)dpx;left: %(left)dpx; font-size: %(size)dpx; height: %(height)dpx; line-height:%(lh)dpx;">%(tag)s</a></li>'
-
-                context['tags'] = ''.join([tags_template % link for link in data['links']])
-                context['width'] = 400
-                context['height'] = 400
-                context['css'] = "".join("a.%(cname)s{color:%(normal)s;}\
-                    a.%(cname)s:hover{color:%(hover)s;}" %
-                                            {'cname':k,
-                                            'normal': v[0],
-                                            'hover': v[1]}
-                                    for k,v in data['css'].items())
-
-                html_text = html_template.substitute(context)
-                return html_text
-                
-            if len(get_tag_counts(HASHTAGS)) > 50 :
-                    HASHTAGS = ""
-                    return html_text
+        global HASHTAGS
+        return gen_cloud(HASHTAGS)
+        
 ##
 # Standard setup for the simple web server.
 #
