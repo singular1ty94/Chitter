@@ -1,3 +1,11 @@
+"""
+.. module:: chitter
+	:platform: Unix, Windows
+	:synopsis: The core CherryPy server and Twitter streamer.
+.. moduleauthor:: Brett Orr <brett.orr@connect.qut.edu.au>
+.. moduleauthor:: Kannon Chan <kannon.chan@connect.qut.edu.au>
+
+"""
 import os, os.path
 import cherrypy
 from naives import *
@@ -27,20 +35,23 @@ html_text = ""
 #Colorscheme
 COLOR_SCHEME = [(229,106,0), (204,199,148), (153,145,124), (88,89,86), (48,49,51)]
 
-
-##
-# Simple Class for Listening to
-# the stream.
-##
 class listener(StreamListener):
+    """Simple Class for Listening to the Twitter stream.
 
-    ##
-    # When the data is received, and if we're not stopped,
-    # get the text and add to the tweets array.
-    # Then take the hashtags (if any), and combine into the 
-    # global Hashtag string.
-    ##
+    Args:
+        StreamListener: The type of Stream Listener to use.
+    """
+
     def on_data(self, data):
+        """Controls receiving data from the Twitter Stream.
+        When the data is received, and if we're not stopped,
+        get the text and add to the tweets array.
+        Then take the hashtags (if any), and combine into the 
+        global Hashtag string.
+         
+        Args:
+            data (str): The JSON data (string format) received from the stream.
+        """
         global stop, tweets, HASHTAGS
         if stop is False:
             tweet = json.loads(data)
@@ -56,12 +67,15 @@ class listener(StreamListener):
         else:
             return False
 
-    ##
-    # Basic error handling.
-    ##
+
     def on_error(self, status):
+        """Handles errors in the stream.
+
+        Args:
+            status (str):   The Error received.
+        """
         print status
-    #self.disconnect()
+        #self.disconnect()
 
 # Set up the core features, but don't stream yet.
 auth = OAuthHandler(ckey, csecret)
@@ -70,11 +84,14 @@ auth.set_access_token(atoken, asecret)
 #Global twitter stream
 twitterStream = None
 
-##
-# Simple cloud tag generator based on the weight
-# of any given word in a dictionary of terms.
-##
+
 def gen_cloud(tags):
+    """Simple cloud tag generator based on the weight
+    of any given word in a dictionary of terms.
+
+    Args:
+        tags (arr): The array of tags to generate a cloud from.
+    """
     global COLOR_SCHEME
     words = {}
     for x in (' '.join(tags)).split():
@@ -84,15 +101,23 @@ def gen_cloud(tags):
                       %(x, min(10 + (p*10) / max(words.values()), 20), COLOR_SCHEME[randint(0,len(COLOR_SCHEME)-1)],x, p))
                      for (x, p) in words.items()])
 
-##
-# The Chitter Web Server
-##
 class Chitter(object):
+    """The main Chitter server object.
+
+    Available Endpoints are:
+    **/index**: Index page.
+    **/prepare(search)**: Prepare the streamer.
+    **/stream**: Get the latest tweet.
+    **/stop**: Stop the streamer.
+    **/clear**: Clear the internal data.
+    **/cloud**: Return a cloud tag.
+
+
+    """
     
     ##
     # ENDPOINT: /index.html
     # Load the Index Page.
-    ##
     @cherrypy.expose
     def index(self):
         f = open('public/index.html', 'r')
@@ -103,8 +128,7 @@ class Chitter(object):
     ##
     # ENDPOINT: /prepare
     # Takes a given list of strings, splits it, sanitizes it,
-    # and creates a TwitterStreaming object.
-    ##        
+    # and creates a TwitterStreaming object.  
     @cherrypy.expose
     def prepare(self, search=""):
         global twitterStream, tweets, stop, HASHTAGS
@@ -124,8 +148,7 @@ class Chitter(object):
     # ENDPOINT: /stream
     # From the global array of tweets, get the oldest,
     # make a JSON object, acquire the sentiment of the tweet,
-    # and return this object to the client.
-    ##        
+    # and return this object to the client.      
     @cherrypy.expose
     def stream(self):
         global tweets
@@ -155,8 +178,7 @@ class Chitter(object):
     # ENDPOINT: /stop
     # Forces the stream to stop, and stops
     # trying to return tweets. Does not 
-    # clear the hashtag cloud.
-    ##                    
+    # clear the hashtag cloud.             
     @cherrypy.expose
     def stop(self):
         global twitterStream, tweets, stop
@@ -166,8 +188,7 @@ class Chitter(object):
 
     ##
     # ENDPOINT: /clear
-    # Same as /stop, but also clears the hashtags
-    ##        
+    # Same as /stop, but also clears the hashtags        
     @cherrypy.expose
     def clear(self):
         global twitterStream, tweets, stop, HASHTAGS
@@ -180,18 +201,16 @@ class Chitter(object):
     # ENDPOINT: /cloud
     # Generates a new cloud tag in HTML format,
     # and returns this HTML string.
-    ##  
     @cherrypy.expose
     def cloud(self):
         global HASHTAGS
         return gen_cloud(HASHTAGS)
         
-##
+#
 # Standard setup for the simple web server.
 #
 # Sets the static folders under the /public route.
 # Uncomment the line below to enable hosting on AWS or cloud.
-##
 if __name__ == '__main__':
 
     conf = {

@@ -1,0 +1,232 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Welcome to Chitter’s documentation! &mdash; Chitter 1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Chitter 1 documentation" href="#" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="#">Chitter 1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="welcome-to-chitter-s-documentation">
+<h1>Welcome to Chitter&#8217;s documentation!<a class="headerlink" href="#welcome-to-chitter-s-documentation" title="Permalink to this headline">¶</a></h1>
+<p>This is the documentation of the INB356, 2014/2 Assignment between Brett Orr and Kannon Chan.</p>
+</div>
+<div class="section" id="module-Chitter.chitter">
+<span id="chitter-py-documentation"></span><h1>Chitter.py &#8211; Documentation<a class="headerlink" href="#module-Chitter.chitter" title="Permalink to this headline">¶</a></h1>
+<span class="target" id="module-chitter"></span><dl class="class">
+<dt id="Chitter.chitter.Chitter">
+<em class="property">class </em><tt class="descclassname">Chitter.chitter.</tt><tt class="descname">Chitter</tt><a class="headerlink" href="#Chitter.chitter.Chitter" title="Permalink to this definition">¶</a></dt>
+<dd><p>The main Chitter server object.</p>
+<p>Available Endpoints are:
+<strong>/index</strong>: Index page.
+<strong>/prepare(search)</strong>: Prepare the streamer.
+<strong>/stream</strong>: Get the latest tweet.
+<strong>/stop</strong>: Stop the streamer.
+<strong>/clear</strong>: Clear the internal data.
+<strong>/cloud</strong>: Return a cloud tag.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Chitter.chitter.gen_cloud">
+<tt class="descclassname">Chitter.chitter.</tt><tt class="descname">gen_cloud</tt><big>(</big><em>tags</em><big>)</big><a class="headerlink" href="#Chitter.chitter.gen_cloud" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simple cloud tag generator based on the weight
+of any given word in a dictionary of terms.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>tags (arr): The array of tags to generate a cloud from.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="Chitter.chitter.listener">
+<em class="property">class </em><tt class="descclassname">Chitter.chitter.</tt><tt class="descname">listener</tt><big>(</big><em>api=None</em><big>)</big><a class="headerlink" href="#Chitter.chitter.listener" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simple Class for Listening to the Twitter stream.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>StreamListener: The type of Stream Listener to use.</dd>
+</dl>
+<dl class="method">
+<dt id="Chitter.chitter.listener.on_data">
+<tt class="descname">on_data</tt><big>(</big><em>data</em><big>)</big><a class="headerlink" href="#Chitter.chitter.listener.on_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Controls receiving data from the Twitter Stream.
+When the data is received, and if we&#8217;re not stopped,
+get the text and add to the tweets array.
+Then take the hashtags (if any), and combine into the 
+global Hashtag string.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>data (str): The JSON data (string format) received from the stream.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="Chitter.chitter.listener.on_error">
+<tt class="descname">on_error</tt><big>(</big><em>status</em><big>)</big><a class="headerlink" href="#Chitter.chitter.listener.on_error" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handles errors in the stream.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>status (str):   The Error received.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-Chitter.naives">
+<span id="naives-py-documentation"></span><h1>Naives.py &#8211; Documentation<a class="headerlink" href="#module-Chitter.naives" title="Permalink to this headline">¶</a></h1>
+<span class="target" id="module-naives"></span><dl class="function">
+<dt id="Chitter.naives.extractFeatures">
+<tt class="descclassname">Chitter.naives.</tt><tt class="descname">extractFeatures</tt><big>(</big><em>tweet</em><big>)</big><a class="headerlink" href="#Chitter.naives.extractFeatures" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extract features from the tweet.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>tweet: The tweet text to analyze.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="Chitter.naives.getFeatureVector">
+<tt class="descclassname">Chitter.naives.</tt><tt class="descname">getFeatureVector</tt><big>(</big><em>tweet</em>, <em>stopWords</em><big>)</big><a class="headerlink" href="#Chitter.naives.getFeatureVector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get features of the tweet.
+Args:</p>
+<blockquote>
+<div><p>tweet: The tweet text to analyze.</p>
+<p>stopWords: The list of stop words.</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="Chitter.naives.getStopWordList">
+<tt class="descclassname">Chitter.naives.</tt><tt class="descname">getStopWordList</tt><big>(</big><em>stopWordListFileName</em><big>)</big><a class="headerlink" href="#Chitter.naives.getStopWordList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load the stop words list.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>stopWordListFileName: The filename of the .txt with the stop words.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="Chitter.naives.replaceDouble">
+<tt class="descclassname">Chitter.naives.</tt><tt class="descname">replaceDouble</tt><big>(</big><em>s</em><big>)</big><a class="headerlink" href="#Chitter.naives.replaceDouble" title="Permalink to this definition">¶</a></dt>
+<dd><p>Look for 2 or more repetitions of character and replace
+with the character itself</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>s: The text to analyze.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="Chitter.naives.simplify">
+<tt class="descclassname">Chitter.naives.</tt><tt class="descname">simplify</tt><big>(</big><em>tweet</em><big>)</big><a class="headerlink" href="#Chitter.naives.simplify" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simplifies tweet before extraction.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>tweet: The text of the tweet to simplify.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="Chitter.naives.testTweet">
+<tt class="descclassname">Chitter.naives.</tt><tt class="descname">testTweet</tt><big>(</big><em>classifier</em>, <em>tweet</em><big>)</big><a class="headerlink" href="#Chitter.naives.testTweet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Using the classifer, take the tweet and determine
+its sentiment.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>classifier: What classifier to use.
+tweet: The Tweet text.</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="#">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Welcome to Chitter&#8217;s documentation!</a></li>
+<li><a class="reference internal" href="#module-Chitter.chitter">Chitter.py &#8211; Documentation</a></li>
+<li><a class="reference internal" href="#module-Chitter.naives">Naives.py &#8211; Documentation</a></li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/index.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="#">Chitter 1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Brett Orr, Kannon Chan.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

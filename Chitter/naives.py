@@ -1,3 +1,10 @@
+"""
+.. module:: naives
+	:platform: Unix, Windows
+	:synopsis: The NLTK addon for analyzing Tweet sentiment.
+.. moduleauthor:: Kannon Chan <kannon.chan@connect.qut.edu.au>
+
+"""
 import nltk
 import re
 import csv
@@ -5,9 +12,12 @@ import random
 import os.path
 import cPickle as pickle
 
-#simplifies tweets before extraction
 def simplify(tweet):
+    """Simplifies tweet before extraction.
 
+    Args:
+        tweet: The text of the tweet to simplify.
+    """
     tweet = tweet.lower()
     #urls to URL
     tweet = re.sub('((www\.[^\s]+)|(https?://[^\s]+))','URL',tweet)
@@ -21,8 +31,13 @@ def simplify(tweet):
     tweet = tweet.strip('\'"')
     return tweet
 
-# load stop words 
+
 def getStopWordList(stopWordListFileName):
+    """Load the stop words list.
+
+    Args:
+        stopWordListFileName: The filename of the .txt with the stop words.
+    """
     stopWords = []
     stopWords.append('USER_AT')
     stopWords.append('URL')
@@ -37,15 +52,23 @@ def getStopWordList(stopWordListFileName):
     return stopWords
 
 
-#start replaceDouble
 def replaceDouble(s):
-    #look for 2 or more repetitions of character and replace with the character itself
+    """Look for 2 or more repetitions of character and replace
+    with the character itself
+
+    Args:
+        s: The text to analyze.
+    """
     pattern = re.compile(r"(.)\1{1,}", re.DOTALL)
     return pattern.sub(r"\1\1", s)
 #end
 
-#start extract features from tweet
 def extractFeatures(tweet):
+    """Extract features from the tweet.
+
+    Args:
+        tweet: The tweet text to analyze.
+    """
     tweet_words = set(tweet)
     features = {}
     for word in featureList:
@@ -55,6 +78,12 @@ def extractFeatures(tweet):
 
 #start getfeatureVector
 def getFeatureVector(tweet, stopWords):
+    """Get features of the tweet.
+    Args:
+        tweet: The tweet text to analyze.
+
+        stopWords: The list of stop words.
+    """
     featureVector = []  
     words = tweet.split()
     for w in words:
@@ -74,6 +103,13 @@ def getFeatureVector(tweet, stopWords):
 
 
 def testTweet(classifier,tweet):
+    """Using the classifer, take the tweet and determine
+    its sentiment.
+
+    Args:
+        classifier: What classifier to use.
+        tweet: The Tweet text.
+    """
     simplifyTestTweet = simplify(tweet)
     sentiment = classifier.classify(extractFeatures(getFeatureVector(simplifyTestTweet, stopWords)))
     return sentiment
@@ -124,7 +160,7 @@ pos_tweets = []
 neg_tweets = []
 featureList = []
 tweets = []
-stopWords = getStopWordList('stopWords.txt')
+stopWords = getStopWordList(os.path.abspath('stopWords.txt'))
 
 pos_train = 10000  
 neg_train = 10000
