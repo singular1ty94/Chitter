@@ -155,6 +155,35 @@ $(function() {
 		//Hide loading wheel
 		$('.shaft-load3').hide();
 	}
+	
+	/**
+	* OVERKILL - Polls down to yes > /dev/null
+	*/
+	var overkill = false;
+	$("#overkill").click(function(){
+		//Double check you want to do this.
+		if(!overkill){
+			if(confirm("Start the Overdrive?")){
+				//Starting.
+				$.get('/overkill', function(data) {
+					//Now we set it to go.
+				});
+				overkill = true;
+				$(this).html("Stop Overdrive");
+				alert("Overdrive On.");
+			}
+		}else{
+			if(confirm("Stop the Overdrive?")){
+				//Stop it.
+				$.get('/stopOverkill', function(data) {
+					//Wind it down boys.
+				});
+				overkill = false;
+				$(this).html("Overdrive");
+				alert("Overdrive Off.");
+			}
+		}
+	});
 
 	/**
 	* Make the chart appear or disappear.

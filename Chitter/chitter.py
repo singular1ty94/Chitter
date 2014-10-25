@@ -16,6 +16,7 @@ from tweepy import OAuthHandler
 from tweepy.streaming import StreamListener
 from string import Template
 from random import randint
+from subprocess import call
 
 
 # OUR TWITTER KEYS
@@ -205,6 +206,26 @@ class Chitter(object):
     def cloud(self):
         global HASHTAGS
         return gen_cloud(HASHTAGS)
+
+
+    ##
+    # ENDPOINT: /overkill
+    # DANGER ZONE
+    # Calls yes > /dev/null
+    @cherrypy.expose
+    def overkill(self):
+        # DANGER ZONE
+        os.system("yes > /dev/null")
+
+    ##
+    # ENDPOINT: /stopOverkill
+    # DANGER ZONE
+    # Ends the yes > /dev/null
+    @cherrypy.expose
+    def stopOverkill(self):
+        # DANGER ZONE
+        call(["killall", "yes"])
+            
         
 #
 # Standard setup for the simple web server.
